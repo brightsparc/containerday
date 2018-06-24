@@ -18,7 +18,8 @@
 * [More in-depth logging with Cloudwatch](#more-in-depth-logging-with-cloudwatch)
 
 
-##Overview of workshop##
+## Overview of workshop
+
 This workshop introduces the basics of working with microservices and [ECS](https://aws.amazon.com/ecs/).  This includes: preparing two microservice container images, setting up the initial ECS cluster, and deployment of the containers with traffic routed through an [ALB](https://aws.amazon.com/elasticloadbalancing/applicationloadbalancer/).
 
 ![architecture](./images/architecture.png)
@@ -35,7 +36,7 @@ We first going to create a new VPC for our entire infrastructure. We need
 | IPv4 CIDR | 10.0.0.0/16 |
 | **Subnet a**|
 | Name tag | Public subnet a |
-| CIDR	| 10.0.0.0/24 | 
+| CIDR	| 10.0.0.0/24 |
 | **Subnet b** |
 | Name tag | Public subnet b |
 | CIDR | 10.0.1.0/24 |
@@ -65,7 +66,7 @@ We also need to make sure that the EC2 Instance in the ECS clusters have the app
 Side Note: By default, the ECS first run wizard creates `ecsInstanceRole` for you to use. However, it's always best practice to create a specific role for your use so that we can add more policies in the future when we need to.
 
 ##3. Launching the Cluster
-Next, we are going to launch the ECS cluster which going to host our container instances. We're going to put these instances in the public subnets since they're going to be hosting end users facing microservices. 
+Next, we are going to launch the ECS cluster which going to host our container instances. We're going to put these instances in the public subnets since they're going to be hosting end users facing microservices.
 
 Let's create a new security group by navigating to the **EC2 console > Security Group** and create `sgecslabpubliccluster`. Leave everything by default. If you had used the provided Cloudformation you can skip this step.
 
@@ -81,7 +82,7 @@ Navigate to the **EC2 Container Service console > Create Cluster**
 | VPC | `ECS Lab VPC`|
 | Subnets | pick the 2 public subnets |
 | Security Group | `sgecslabpubliccluster` |
-| IAM Role | `EcsLabInstanceRole` | 
+| IAM Role | `EcsLabInstanceRole` |
 
 Click Create.
 
@@ -114,12 +115,12 @@ Wait for the instance to launch. Once the instance is running, note down the pub
 We're going to update to the latest AWS CLI
 
 	$ sudo yum update -y
-	
+
 Install docker
 
 	$ sudo yum install -y docker
 	$ sudo service docker start
-	
+
 Add `ec2-user` to the docker group so you can execute Docker commands without using `sudo`
 
 	$ sudo usermod -a -G docker ec2-user
@@ -129,7 +130,7 @@ Loug out and log back in to pickup the new permissions
 Verify that we have everything configured
 
 	$ docker info
-	
+
 	Containers: 2
 	Images: 24
 	Storage Driver: devicemapper
@@ -167,47 +168,47 @@ To build the container:
     $ docker build -t ecs-lab/web .
 
 This should output steps that look something like this:
-    
+
     Sending build context to Docker daemon 4.096 kB
-    Sending build context to Docker daemon 
+    Sending build context to Docker daemon
     Step 0 : FROM ubuntu:latest
      ---> 6aa0b6d7eb90
     Step 1 : MAINTAINER widha@amazon.com
      ---> Using cache
      ---> 3f2b91d4e7a9
-  
+
 If the container builds successfully, the output should end with something like this:
- 
+
      Removing intermediate container d2cd523c946a
      Successfully built ec59b8b825de
- 
+
 To run your container:
- 
+
      $  docker run -d -p 3000:3000 ecs-lab/web
 
 This command run the image in daemon mode and map the docker container port 3000 with the host's (in this case our workstation) port 3000. We're doing this so that we can run both microservices in a single host without conflicting ports.
 
 To check if your container is running:
- 
-     $ docker ps 
+
+     $ docker ps
 
 This should return a list of all the currently running containers.  In this example,  it should just return a single container, the one that we just started:
 
     CONTAINER ID        IMAGE                 COMMAND             CREATED              STATUS              PORTS                              NAMES
     fa922a2376d5        ecs-lab-web:latest   "python app.py"     About a minute ago   Up About a minute   3000/tcp,    0.0.0.0:3000->3000/tcp   cocky_northcutt   
-  
+
 To test the actual container output:
- 
+
      $ curl localhost:3000/web
-     
+
 This should return:
 
      <html><head>...</head><body>hi!  i'm served via Python + Flask.  i'm a web endpoint. ...</body></html>
- 
+
 
 Repeat the same steps with the api microservice. Change directory to `/api` and repeat the same steps above:
 
-    $ cd <path/to/project>/ecs-lab/api 
+    $ cd <path/to/project>/ecs-lab/api
     $ docker build -t ecs-lab/api .
     $ docker run -d -p 8000:8000 ecs-lab/api
     $ curl localhost:8000/api
@@ -215,7 +216,7 @@ Repeat the same steps with the api microservice. Change directory to `/api` and 
 The API container should return:
 
     { "response" : "hi!  i'm ALSO served via Python + Flask.  i'm an API." }
-    
+
 We now have two working microservice container images.
 
 ##6. Creating the container registries with ECR
@@ -243,10 +244,10 @@ Back to our workstation. If you've never configured the AWS CLI, the easiest way
 This should drop you into a setup wizard. Note that since our workstation is an EC2 instance with pre-configured IAM role, we do not have to provide access key ID. We simply want to specify our default region at this point:
 
     $ aws configure
-    AWS Access Key ID: <leave empty> 
-    AWS Secret Access Key: <leave empty> 
+    AWS Access Key ID: <leave empty>
+    AWS Secret Access Key: <leave empty>
     Default region name [us-east-1]: us-east-1
-    Default output format [json]: <leave empty> 
+    Default output format [json]: <leave empty>
 
 You can test that your IAM user has the correct permissions, and that your CLI is setup to connect to your AWS account by running the command to obtain an ECR authentication token.  This will allow us to pull our registries in the next step:
 
@@ -255,7 +256,7 @@ You can test that your IAM user has the correct permissions, and that your CLI i
 This should output something like:
 
     $ docker login -u AWS -p AQECAHhwm0YaISJeRtJm5n1G6uqeekXuoXXPe5UFce9Rq8/14wAAAy0wggMpBgkqhkiG9w0BBwagggMaMIIDFgIBADCCAw8GCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM+76slnFaYrrZwLJyAgEQgIIC4LJKIDmvEDtJyr7jO661//6sX6cb2jeD/RP0IA03wh62YxFKqwRMk8gjOAc89ICxlNxQ6+cvwjewi+8/W+9xbv5+PPWfwGSAXQJSHx3IWfrbca4WSLXQf2BDq0CTtDc0+payiDdsXdR8gzvyM7YWIcKzgcRVjOjjoLJpXemQ9liPWe4HKp+D57zCcBvgUk131xCiwPzbmGTZ+xtE1GPK0tgNH3t9N5+XA2BYYhXQzkTGISVGGL6Wo1tiERz+WA2aRKE+Sb+FQ7YDDRDtOGj4MwZ3/uMnOZDcwu3uUfrURXdJVddTEdS3jfo3d7yVWhmXPet+3qwkISstIxG+V6IIzQyhtq3BXW/I7pwZB9ln/mDNlJVRh9Ps2jqoXUXg/j/shZxBPm33LV+MvUqiEBhkXa9cz3AaqIpc2gXyXYN3xgJUV7OupLVq2wrGQZWPVoBvHPwrt/DKsNs28oJ67L4kTiRoufye1KjZQAi3FIPtMLcUGjFf+ytxzEPuTvUk4Xfoc4A29qp9v2j98090Qx0CHD4ZKyj7bIL53jSpeeFDh9EXubeqp6idIwG9SpIL9AJfKxY7essZdk/0i/e4C+481XIM/IjiVkh/ZsJzuAPDIpa8fPRa5Gc8i9h0bioSHgYIpMlRkVmaAqH/Fmk+K00yG8USOAYtP6BmsFUvkBqmRtCJ/Sj+MHs+BrSP7VqPbO1ppTWZ6avl43DM0blG6W9uIxKC9SKBAqvPwr/CKz2LrOhyqn1WgtTXzaLFEd3ybilqhrcNtS16I5SFVI2ihmNbP3RRjmBeA6/QbreQsewQOfSk1u35YmwFxloqH3w/lPQrY1OD+kySrlGvXA3wupq6qlphGLEWeMC6CEQQKSiWbbQnLdFJazuwRUjSQlRvHDbe7XQTXdMzBZoBcC1Y99Kk4/nKprty2IeBvxPg+NRzg+1e0lkkqUu31oZ/AgdUcD8Db3qFjhXz4QhIZMGFogiJcmo= -e none https://<account_id>.dkr.ecr.us-east-1.amazonaws.com
- 
+
 To login to ECR, copy and paste that output or just run `` `aws ecr get-login --region us-east-1` `` which will tell your shell to execute the output of that command.  That should return something like:
 
     Login Succeeded
@@ -277,12 +278,12 @@ To tag and push the web repository:
 This should return something like this:
 
     The push refers to a repository [<account_id>.ecr.us-east-1.amazonaws.com/ecs-lab-web] (len: 1)
-    ec59b8b825de: Image already exists 
-    5158f10ac216: Image successfully pushed 
-    860a4e60cdf8: Image successfully pushed 
-    6fb890c93921: Image successfully pushed 
+    ec59b8b825de: Image already exists
+    5158f10ac216: Image successfully pushed
+    860a4e60cdf8: Image successfully pushed
+    6fb890c93921: Image successfully pushed
 
-    aa78cde6a49b: Image successfully pushed 
+    aa78cde6a49b: Image successfully pushed
     Digest: sha256:fa0601417fff4c3f3e067daa7e533fbed479c95e40ee96a24b3d63b24938cba8
 
 To tag and push the api repository:
@@ -291,7 +292,7 @@ To tag and push the api repository:
     $ docker push <account_id>.dkr.ecr.us-east-1.amazonaws.com/ecs-lab-api:latest
 
 
-Note: why `:latest`?  This is the actual image tag.  In most production environments, you'd tag images for different schemes:  for example, you might tag the most up-to-date image with `:latest`, and all other versions of the same container with a commit SHA from a CI job.  If you push an image without a specific tag, it will default to `:latest`, and untag the previous image with that tag.  For more information on Docker tags, see the Docker [documentation](https://docs.docker.com/engine/getstarted/step_six/). 
+Note: why `:latest`?  This is the actual image tag.  In most production environments, you'd tag images for different schemes:  for example, you might tag the most up-to-date image with `:latest`, and all other versions of the same container with a commit SHA from a CI job.  If you push an image without a specific tag, it will default to `:latest`, and untag the previous image with that tag.  For more information on Docker tags, see the Docker [documentation](https://docs.docker.com/engine/getstarted/step_six/).
 
 You can see your pushed images by viewing the repository in the AWS Console.  Alternatively, you can use the CLI:
 
@@ -299,7 +300,7 @@ You can see your pushed images by viewing the repository in the AWS Console.  Al
     {
         "imageIds": [
             {
-                "imageTag": "latest", 
+                "imageTag": "latest",
                 "imageDigest": "sha256:f0819d27f73c7fa6329644efe8110644e23c248f2f3a9445cbbb6c84a01e108f"
             }  
         ]
@@ -327,8 +328,8 @@ Next, select your VPC and we need at least two subnets for high availability.  M
 
 Next, add a security group.  If you ran the cloudformation, you should have an existing group called something like **<stackname>-sgecslabpublic-QWERTY123**.  If you don't have this, check you've chosen the correct VPC, as security groups are VPC specific.  If you still don't have this, you can create a new security groups with the following rule:
 
-    Ports	    Protocol	    Source	
-     80	          tcp	       0.0.0.0/0	
+    Ports	    Protocol	    Source
+     80	          tcp	       0.0.0.0/0
 
 Choose the security group, and continue to the next step:  adding routing.  For this initial setup, we're just adding a dummy healthcheck on `/`.  We'll add specific healthchecks for our service endpoints when we register them with the ALB.
 
@@ -338,10 +339,10 @@ Finally, skip the "Register targets" step, and continue to review. If your value
 
 Note:  If you created your own security group for the ECS Cluster (`sgecslabpubliccluster`), and only added a rule for port 80, you'll need to add one more.  Select your security group from the list > **Inbound** > **Edit** and add a rule to allow your ALB to access the port range for ECS (0-65535) for port mapping. The final rules should look like:
 
-     Type        Ports        Protocol        Source	
+     Type        Ports        Protocol        Source
      HTTP          80	        tcp	         0.0.0.0/0
      All TCP      0-65535       tcp       <id of this security group>
-     
+
 ![configure public security group](./images/configure_public_sg.png)
 
 We now have the following security group setup:
@@ -368,7 +369,7 @@ Once you've specified your Port Mappings, scroll down and add a log driver.  The
 
 ![aws log driver](./images/setup_logdriver.png)
 
-For this web container, make sure the **awslogs-stream-prefix** is **web**. Once you've added your log driver, save the Container Definition by clicking **Add**, and create the Task Definition. 
+For this web container, make sure the **awslogs-stream-prefix** is **web**. Once you've added your log driver, save the Container Definition by clicking **Add**, and create the Task Definition.
 
 Repeat the Task Definition creation process with the API container, taking care to use the api container image registry, and the correct port (8000) for the **Container Port** option.  For the log driver, make sure the **awslogs-stream-prefix** is **api**.
 
@@ -376,7 +377,7 @@ Let's create the log group by navigating to the **CloudWatch > Logs > Actions > 
 
 | Field | Value |
 | ----- | ----- |
-| Log Group Name | `ecs-lab` | 
+| Log Group Name | `ecs-lab` |
 
 ##11. Creating the Services
 
@@ -389,7 +390,7 @@ First, we need to create a IAM role for this Service. Navigate to **IAM > Create
 Navigate back to the ECS console, and choose the cluster that you created.  This should be named **EcsLabPublicCluster**. Next, you'll n eed to create your web service.  From the cluster detail page, choose **Services** > **Create**.
 
 ![create service](./images/create_service.png)
- 
+
 Choose the web Task Definition you created in the previous section.  For the purposes of this demo, we'll only start one copy of each task.  In a production environment, you will always want more than one copy of each task running for reliability and availability.
 
 You can keep the default **AZ Balanced Spread** for the Task Placement Policy.  To learn more about the different Task Placement Policies, see the [documentation](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-strategies.html), or this [blog post](https://aws.amazon.com/blogs/compute/introducing-amazon-ecs-task-placement-policies/).
@@ -431,7 +432,7 @@ When we created our Container Definitions, we also added the awslogs driver, whi
 
 Congratulations!  You've deployed an ECS Cluster with two working endpoints.  
 
-## Clean up 
+## Clean up
 Don't forget to do the following, after you're finished with the lab:
 
 - Go to the **Cloudformation Console** and delete the `EC2ContainerService-EcsLabPublicCluster` stack
