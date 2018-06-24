@@ -4,7 +4,7 @@ This repository contains code and artefacts for labs related to docker container
 
 ## Lab 1
 
-This workshop introduces the basics of working with microservices and ECS.  [Get Started](https://github.com/brightsparc/containerday/tree/master/microservices) with
+This workshop introduces the basics of working with [Microservices and ECS](https://github.com/brightsparc/containerday/tree/master/microservices)
 
 ## Lab 2
 
