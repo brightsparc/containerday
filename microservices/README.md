@@ -12,10 +12,10 @@
 * [Configuring the AWS CLI](#7-configuring-the-aws-cli)
 * [Pushing our tested images to ECR](#8-pushing-our-tested-images-to-ecr)
 * [Creating the ALB](#9-creating-the-alb)
-* [Creating the Task Definitions](#10-create-your-task-definitions)
-* [Creating the Services](#11-create-the-services)
+* [Creating the Task Definitions](#10-creating-the-task-definitions)
+* [Creating the Services](#11-creating-the-services)
 * [Testing our Service deployments from the Console and ALB](#12-testing-our-service-deployments-from-the-console-and-the-alb)
-* [More in-depth logging with Cloudwatch](#more-in-depth-logging-with-cloudwatch)
+* [More in-depth logging with Cloudwatch](#13-more-in-depth-logging-with-cloudwatch)
 
 
 ## Overview of workshop
