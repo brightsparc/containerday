@@ -211,15 +211,6 @@
       },
       "DependsOn": "gw1"
     },
-    "dchpassoc1": {
-      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
-      "Properties": {
-        "VpcId": {
-          "Ref": "vpcd8b352a1"
-        },
-        "DhcpOptionsId": "dopt-d79eb5b2"
-      }
-    },
     "ingress1": {
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
