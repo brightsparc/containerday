@@ -1,0 +1,343 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "vpcd8b352a1": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "InstanceTenancy": "default",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ECS Lab VPC"
+          }
+        ]
+      }
+    },
+    "subnetc029d5ec": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.1.0/24",
+        "AvailabilityZone": "us-east-1a",
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ECS Lab Public subnet b"
+          }
+        ]
+      }
+    },
+    "subnet4e19b706": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/24",
+        "AvailabilityZone": "us-east-1b",
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ECS Lab Public subnet a"
+          }
+        ]
+      }
+    },
+    "igw742af512": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+      }
+    },
+    "acl5f40fa26": {
+      "Type": "AWS::EC2::NetworkAcl",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        }
+      }
+    },
+    "rtb38a04340": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        }
+      }
+    },
+    "sgecslabworkstation": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for the ECS workstation bastion",
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ECS Lab workstation bastion Group"
+          }
+        ]
+      }
+    },
+    "sgecslabpublic": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for the public accessible endpoint",
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ECS Lab public endpoint Group"
+          }
+        ]
+      }
+    },
+    "sgecslabpubliccluster": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for public microservice resources",
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ECS Lab public cluster Group"
+          }
+        ]
+      }
+    },
+    "acl1": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "Properties": {
+        "CidrBlock": "0.0.0.0/0",
+        "Egress": "true",
+        "Protocol": "-1",
+        "RuleAction": "allow",
+        "RuleNumber": "100",
+        "NetworkAclId": {
+          "Ref": "acl5f40fa26"
+        }
+      }
+    },
+    "acl4": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "Properties": {
+        "CidrBlock": "0.0.0.0/0",
+        "Protocol": "6",
+        "RuleAction": "allow",
+        "RuleNumber": "100",
+        "PortRange": {
+          "From": "0",
+          "To": "65535"
+        },
+        "NetworkAclId": {
+          "Ref": "acl5f40fa26"
+        }
+      }
+    },
+    "subnetacl1": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl5f40fa26"
+        },
+        "SubnetId": {
+          "Ref": "subnetc029d5ec"
+        }
+      }
+    },
+    "subnetacl2": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "acl5f40fa26"
+        },
+        "SubnetId": {
+          "Ref": "subnet4e19b706"
+        }
+      }
+    },
+    "gw1": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        },
+        "InternetGatewayId": {
+          "Ref": "igw742af512"
+        }
+      }
+    },
+    "subnetroute1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb38a04340"
+        },
+        "SubnetId": {
+          "Ref": "subnet4e19b706"
+        }
+      }
+    },
+    "subnetroute2": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb38a04340"
+        },
+        "SubnetId": {
+          "Ref": "subnetc029d5ec"
+        }
+      }
+    },
+    "route1": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": {
+          "Ref": "rtb38a04340"
+        },
+        "GatewayId": {
+          "Ref": "igw742af512"
+        }
+      },
+      "DependsOn": "gw1"
+    },
+    "dchpassoc1": {
+      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpcd8b352a1"
+        },
+        "DhcpOptionsId": "dopt-d79eb5b2"
+      }
+    },
+    "ingress1": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgecslabworkstation"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress2": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgecslabpublic"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress3": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgecslabpubliccluster"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "0",
+        "ToPort": "65535",
+        "SourceSecurityGroupId": {
+          "Ref": "sgecslabpublic"
+        }
+      }
+    },
+    "egress1": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgecslabworkstation"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress2": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgecslabpublic"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress3": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgecslabpubliccluster"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ecslabworkstationrole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          } ]
+        },
+        "ManagedPolicyArns": [ "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess" ],
+        "Path": "/",
+        "RoleName": "EcsLabWorkstationRole"
+      }
+    },
+    "ecslabinstancerole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          } ]
+        },
+        "ManagedPolicyArns": [ "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role" ],
+        "Path": "/",
+        "RoleName": "EcsLabInstanceRole"
+      }
+    },
+    "ecslabworkstationprofile": {
+        "Type": "AWS::IAM::InstanceProfile",
+        "Properties": {
+          "Path": "/",
+          "Roles": [ { "Ref": "ecslabworkstationrole"} ]
+        }
+    },
+    "ecslabinstanceprofile": {
+        "Type": "AWS::IAM::InstanceProfile",
+        "Properties": {
+          "Path": "/",
+          "Roles": [ { "Ref": "ecslabinstancerole"} ]
+        }
+    }
+  },
+  "Description": "Create the basic requirements for Microservices and ECS Lab"
+}

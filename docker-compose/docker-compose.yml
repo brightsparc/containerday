@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    links:
+      - db
+    healthcheck:
+      test: ["CMD", "/app", "-ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  db:
+    image: redis
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
