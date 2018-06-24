@@ -24,9 +24,10 @@ This workshop introduces the basics of working with microservices and [ECS](http
 
 ![architecture](./images/architecture.png)
 
-Prior to beginning the workshop, you'll need to [have a working AWS account](<https://aws.amazon.com>). We recommend going through step 1-12 in sequence, however if you are already familiar with the above architecture, you can simply execute [the Lab setup Cloudformation template](cloudformation/ecs-lab-basic-setup.template.json), name it `ecs-lab` and jump ahead to [Step 3. Launching the Cluster](#3-launching-the-cluster). We highly recommend reviewing the cloudformation template to get familiar with what being initialized.
+Prior to beginning the workshop, you'll need to [have a working AWS account](<https://aws.amazon.com>). We recommend going through step 1-12 in sequence, however if you are already familiar with the above architecture, you can:
 
-Alternatively you can sign into QwickLabs to provision an [Introduction to Amazon Elastic Container Registry](https://qwiklabs.com/catalog_lab/256) environment for you.
+* execute [the Lab setup Cloudformation template](cloudformation/ecs-lab-basic-setup.template.json), name it `ecs-lab` and jump ahead to [Step 3. Launching the Cluster](#3-launching-the-cluster). We highly recommend reviewing the cloudformation template to get familiar with what being initialized.
+* or use QwickLabs to provision an [Introduction to Amazon Elastic Container Registry](https://qwiklabs.com/catalog_lab/256) environment for you and jump ahead to [Step 5. Prepping the Docker Images](#5-prepping-the-docker-images)
 
 ## 1. Setting up the VPC
 
