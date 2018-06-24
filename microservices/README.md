@@ -26,7 +26,8 @@ This workshop introduces the basics of working with microservices and [ECS](http
 
 Prior to beginning the workshop, you'll need to [have a working AWS account](<https://aws.amazon.com>). We recommend going through step 1-12 in sequence, however if you are already familiar with the above architecture, you can simply execute [the Lab setup Cloudformation template](cloudformation/ecs-lab-basic-setup.template.json), name it `ecs-lab` and jump ahead to [Step 3. Launching the Cluster](#3-launching-the-cluster). We highly recommend reviewing the cloudformation template to get familiar with what being initialized.
 
-##1. Setting up the VPC##
+## 1. Setting up the VPC
+
 We first going to create a new VPC for our entire infrastructure. We need
 2 public subnets, for our workstation bastian host, ECS cluster and the ALB. Go ahead and configure a VPC with the following requirements:
 
@@ -44,7 +45,7 @@ We first going to create a new VPC for our entire infrastructure. We need
 
 Side Note: In production you will most likely also have ECS clusters in private subnets. In this case, you will need to remember to attach a NAT gateway onto the subnets so that each ECS Container agent can get updates and retrieve container images from your registry.
 
-##2. Setting up the IAM user and roles
+## 2. Setting up the IAM user and roles
 
 In order to work with ECS from our workstation, we will need the appropriate permissions for our workstation EC2 Instance, you can do so by going to **Roles** > **Create New Role**
 We will later assign this role to our EC2 Workstation Bastian instance:
@@ -65,7 +66,8 @@ We also need to make sure that the EC2 Instance in the ECS clusters have the app
 
 Side Note: By default, the ECS first run wizard creates `ecsInstanceRole` for you to use. However, it's always best practice to create a specific role for your use so that we can add more policies in the future when we need to.
 
-##3. Launching the Cluster
+## 3. Launching the Cluster
+
 Next, we are going to launch the ECS cluster which going to host our container instances. We're going to put these instances in the public subnets since they're going to be hosting end users facing microservices.
 
 Let's create a new security group by navigating to the **EC2 console > Security Group** and create `sgecslabpubliccluster`. Leave everything by default. If you had used the provided Cloudformation you can skip this step.
@@ -86,7 +88,7 @@ Navigate to the **EC2 Container Service console > Create Cluster**
 
 Click Create.
 
-##4. Launching the Workstation##
+## 4. Launching the Workstation
 
 Next, we're going to launch our workstation. Think of this as the developer's machine which runs Docker and have access to our Git repository .
 
@@ -150,7 +152,7 @@ Verify that we have everything configured
 
 We now have a working developer workstation.
 
-##5. Prepping the Docker images
+## 5. Prepping the Docker images
 
 At this point, we're going to pretend that we're the developers of both the `web` and `api` microservice, and we will get the latest from our source repo. In this case we will just be using the plain old `curl`, but just pretend you're using `git`
 
@@ -219,7 +221,7 @@ The API container should return:
 
 We now have two working microservice container images.
 
-##6. Creating the container registries with ECR
+## 6. Creating the container registries with ECR
 
 Before we can build and push our images, we need somewhere to push them to.  In this case, we're going to create two repositories in [ECR](https://aws.amazon.com/ecr/).
 
@@ -235,7 +237,7 @@ Once you've created the repository, it will display the push commands.  Take not
 
 Once you've created the ecs-lab-web, repeat the process for a second repository.  This one should be named **ecs-lab/api**.  Take note of the push commands for this second repository, also. Push commands are unique per repository.
 
-##7. Configuring the AWS CLI
+## 7. Configuring the AWS CLI
 
 Back to our workstation. If you've never configured the AWS CLI, the easiest way is by running:
 
@@ -264,7 +266,7 @@ To login to ECR, copy and paste that output or just run `` `aws ecr get-login --
 If you are unable to login to ECR, check your IAM user group permissions.
 
 
-##8. Pushing our tested images to ECR
+## 8. Pushing our tested images to ECR
 
 Now that we've tested our images locally, we need to tag them again, and push them to ECR.  This will allow us to use them in Task Definitions that can be deployed to an ECS cluster.  
 
@@ -306,7 +308,7 @@ You can see your pushed images by viewing the repository in the AWS Console.  Al
         ]
     }
 
-##9. Creating the ALB
+## 9. Creating the ALB
 
 Now that we've pushed our images, we need an Application Load Balancer [ALB](https://aws.amazon.com/elasticloadbalancing/applicationloadbalancer/) to route traffic to our endpoints. Compared to a traditional load balancer, an ALB lets you direct traffic between different endpoints.  In our example, we'll use two separate endpoints:  `/web` and `/api`.
 
@@ -349,7 +351,7 @@ We now have the following security group setup:
 
 ![security group design](./images/security_group_design.png)
 
-##10. Creating the Task Definitions
+## 10. Creating the Task Definitions
 
 Before you can register a container to a service, it needs be a part of a Task Definition. Task Definitions define things like environment variables, the container image you wish to use, and the resources you want to allocate to the service (port, memory, CPU).  To create a Task Definition, choose **Task Definitions** from the ECS console menu.  Then, choose **Create a Task Definition**:
 
@@ -379,7 +381,7 @@ Let's create the log group by navigating to the **CloudWatch > Logs > Actions > 
 | ----- | ----- |
 | Log Group Name | `ecs-lab` |
 
-##11. Creating the Services
+## 11. Creating the Services
 
 Next, we're going to create the service. A service is a group of tasks (which are containers). Here you can define how many tasks you want to run simultaneously and several more configuration around their lifecycle.
 
@@ -409,7 +411,7 @@ If the values look correct, click **Save** to add your Container. Then **Create 
 
 Repeat this process for the `api` microservice and task definition. Don't forget to adjust the target group name, path pattern, evaluation order and health check path accordingly.  
 
-##12. Testing our service deployments from the console and the ALB
+## 12. Testing our service deployments from the console and the ALB
 
 You can see service level events from the ECS console.  This includes deployment events. You can test that both of your services deployed, and registered properly with the ALB by looking at the service's **Events** tab:
 
@@ -421,14 +423,13 @@ We can also test from the ALB itself.  To find the DNS A record for your ALB, na
 
 You can see that the ALB routes traffic appropriately based on the paths we specified when we registered the containers:  `/web*` requests go to our web service, and `/api*` requests go to our API service.
 
-
-##13. More in-depth logging with Cloudwatch
+## 13. More in-depth logging with Cloudwatch
 
 When we created our Container Definitions, we also added the awslogs driver, which sends logs to [Cloudwatch](https://aws.amazon.com/cloudwatch/).  You can see more details logs for your services by going to the Cloudwatch console, and selecting first our log group `ecs-lab` and then choosing an individual stream:
 
 ![event streams](./images/event_streams.png)
 
-##That's a wrap!
+## That's a wrap!
 
 Congratulations!  You've deployed an ECS Cluster with two working endpoints.  
 
@@ -442,7 +443,7 @@ Don't forget to do the following, after you're finished with the lab:
 - Go to the **EC2 Console**, terminate the `ecs-lab-workstation` EC2 Instance, the Application Load Balancer and the 3 Target Groups
 - Go to **IAM console** and delete the 2 roles `EcslabInstanceRole` and `EcsWorkstationRole`
 
-##Find the above a little boring?
+## Find the above a little boring?
 
 Here are some ideas to make it more interesting:
 
