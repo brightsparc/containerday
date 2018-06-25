@@ -159,8 +159,8 @@ We now have a working developer workstation.
 
 At this point, we're going to pretend that we're the developers of both the `web` and `api` microservice, and we will get the latest from our source repo. In this case we will just be using the plain old `curl`, but just pretend you're using `git`
 
-	$ curl -O https://s3-us-west-2.amazonaws.com/apn-bootcamps/microservice-ecs-2017/ecs-lab-code-20170511.tar.gz
-	$ tar -xvf ecs-lab-code-20170511.tar.gz
+	$ curl -O https://s3-us-west-2.amazonaws.com/apn-bootcamps/microservice-ecs-2017/ecs-lab-code-20170524.tar.gz
+	$ tar -xvf ecs-lab-code-20170524.tar.gz
 
 Our first step is the build and test our containers locally.  If you've never worked with Docker before, there are a few basic commands that we'll use in this workshop, but you can find a more thorough list in the [Docker "Getting Started" documentation](https://docs.docker.com/engine/getstarted/).
 
