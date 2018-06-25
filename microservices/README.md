@@ -256,7 +256,7 @@ This should drop you into a setup wizard. Note that since our workstation is an 
 
 You can test that your IAM user has the correct permissions, and that your CLI is setup to connect to your AWS account by running the command to obtain an ECR authentication token.  This will allow us to pull our registries in the next step:
 
-    $ aws ecr get-login --region us-east-1
+    $ aws ecr get-login --no-include-email --region us-east-1
 
 This should output something like:
 
